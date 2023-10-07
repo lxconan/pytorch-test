@@ -1,6 +1,11 @@
 import torch
 import unittest
 
+# If you do not know what matrix multiplication is, please read this article:
+# * https://www.mathsisfun.com/algebra/matrix-multiplying.html
+#
+# If you want an interactive example, please visit this website:
+# * https://matrixmultiplication.xyz/
 
 class TensorMatrixMultiplicationTest(unittest.TestCase):
 
@@ -135,12 +140,6 @@ class TensorMatrixMultiplicationTest(unittest.TestCase):
         result = torch.matmul(matrix, vector)
         self.assertTrue(result.equal(torch.tensor([[5, 11], [17, 23]])))
 
-    # TODO:
-    # Only broadcast cases are missing now.
-    # * If both arguments are at least 1-dimensional and at least one argument is N-dimensional (where N > 2), then a
-    # batched matrix multiply is returned. If the first argument is 1-dimensional, a 1 is prepended to its dimension for
-    # the purpose of the batched matrix multiply and removed after. If the second argument is 1-dimensional, a 1 is
-    # appended to its dimension for the purpose of the batched matrix multiple and removed after. The non-matrix
-    # (i.e. batch) dimensions are broadcast (and thus must be broadcast-able). For example, if `input` is a
-    # (j * 1 * n * n) tensor and `other` is a (k * n * n) tensor, out will be an (j * k * n * n) tensor.
-    # Please refer to: https://pytorch.org/docs/stable/generated/torch.matmul.html
+    def test_should_get_the_outer_dimensions_for_matrix_multiplication(self):
+        result = torch.matmul(torch.rand(2, 3), torch.rand(3, 2))
+        self.assertEqual(result.shape, torch.Size([2, 2]))
