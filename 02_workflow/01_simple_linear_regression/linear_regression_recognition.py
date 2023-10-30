@@ -16,7 +16,7 @@ class LinearRegressionRecognition:
         self.train_set_factor = train_set_factor
 
     def create_data_set(self):
-        x_data_set = torch.arange(0., 1., 0.02).unsqueeze(dim=1)
+        x_data_set = torch.arange(0., 1., 0.01).unsqueeze(dim=1)
         y_data_set = self.actual_weight * x_data_set + self.actual_bias
         train_set_length = int(len(x_data_set) * self.train_set_factor)
         self.x_train_set = x_data_set[:train_set_length]
@@ -37,7 +37,7 @@ class LinearRegressionRecognition:
     @staticmethod
     def plot_loss_values(loss_values: torch.Tensor, last_epoch):
         plt.figure(figsize=(10, 7))
-        plt.plot(torch.arange(0, last_epoch + 1, step=1), loss_values, label='Training loss')
+        plt.plot(torch.arange(0, len(loss_values), step=1), loss_values, label='Training loss')
         plt.legend(prop={'size': 14})
         plt.ylim(bottom=0)
         plt.show()
@@ -82,7 +82,7 @@ class LinearRegressionRecognition:
         # will use the gradient of the loss function to adjust the weights and bias. The gradient is calculated using
         # back propagation.
         loss_function = nn.MSELoss()
-        optimizer = torch.optim.SGD(model_0.parameters(), lr=0.05)
+        optimizer = torch.optim.SGD(model_0.parameters(), lr=0.05, weight_decay=0.0001)
 
         # Now we will build the training loop. The training loop will do the following things:
         # 0. Loop through the training data.
@@ -91,7 +91,7 @@ class LinearRegressionRecognition:
         # 3. Optimizer zero grad
         # 4. Perform back propagation on the loss with respect to the parameters of the model.
         # 5. Step the optimizer (perform gradient decent).
-        loss_values, last_epoch = self.train_model(model_0, loss_function, optimizer, min_error=0.0001, max_epochs=1000)
+        loss_values, last_epoch = self.train_model(model_0, loss_function, optimizer, min_error=1e-6, max_epochs=10000)
         self.plot_loss_values(loss_values, last_epoch)
 
         # Let's check the result
