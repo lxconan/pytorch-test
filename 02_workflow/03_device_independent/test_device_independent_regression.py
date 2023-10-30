@@ -1,3 +1,4 @@
+import math
 import unittest
 import torch
 import torch.nn as nn
@@ -23,6 +24,7 @@ class DeviceIndependentRegression(unittest.TestCase):
         print(f'After training, the model parameters are: {model.state_dict()}')
         self.evaluate_model(model, x_train_set, y_train_set, x_test_set, y_test_set)
 
+    # noinspection DuplicatedCode
     @staticmethod
     def create_data_set(expected_weight, expected_bias):
         # by default the data set is created on the cpu, we will move it to the gpu when needed
@@ -68,6 +70,9 @@ class DeviceIndependentRegression(unittest.TestCase):
             error.append(loss.item())
             if loss.item() < error_threshold:
                 print(f'Training stopped after {epoch} epochs, loss: {loss}')
+                break
+            if math.isnan(loss.item()):
+                print(f'Training stopped after {epoch} epochs, because loss value is nan.')
                 break
 
             optimizer.zero_grad()

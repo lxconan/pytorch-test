@@ -1,3 +1,5 @@
+import math
+
 import torch
 from torch import nn
 from matplotlib import pyplot as plt
@@ -35,7 +37,7 @@ class LinearRegressionRecognition:
         plt.show()
 
     @staticmethod
-    def plot_loss_values(loss_values: torch.Tensor, last_epoch):
+    def plot_loss_values(loss_values: torch.Tensor):
         plt.figure(figsize=(10, 7))
         plt.plot(torch.arange(0, len(loss_values), step=1), loss_values, label='Training loss')
         plt.legend(prop={'size': 14})
@@ -91,8 +93,8 @@ class LinearRegressionRecognition:
         # 3. Optimizer zero grad
         # 4. Perform back propagation on the loss with respect to the parameters of the model.
         # 5. Step the optimizer (perform gradient decent).
-        loss_values, last_epoch = self.train_model(model_0, loss_function, optimizer, min_error=1e-6, max_epochs=10000)
-        self.plot_loss_values(loss_values, last_epoch)
+        loss_values = self.train_model(model_0, loss_function, optimizer, min_error=1e-6, max_epochs=10000)
+        self.plot_loss_values(loss_values)
 
         # Let's check the result
         model_0.eval()
@@ -119,8 +121,7 @@ class LinearRegressionRecognition:
             # 2. Calculate the loss function (compare forward predictions with the truth labels).
             loss = loss_function(y_prediction, self.y_train_set)
             loss_values.append(loss)
-            if loss < min_error:
-                last_epoch = epoch
+            if loss < min_error or math.isnan(loss):
                 break
 
             # 3. Optimizer zero grad because PyTorch will by default accumulate the gradients on subsequent backward.
@@ -142,4 +143,4 @@ class LinearRegressionRecognition:
             # rate scheduling. For more information, please check: https://youtu.be/IHZwWFHWa-w.
             optimizer.step()
 
-        return torch.tensor(loss_values, dtype=torch.float32), last_epoch
+        return torch.tensor(loss_values, dtype=torch.float32)
