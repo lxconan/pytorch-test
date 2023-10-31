@@ -1,18 +1,20 @@
 import unittest
-import torch
 from pathlib import Path
-from linear_regression_model_to_save import LinearRegressionModelToSave
-from linear_regression_model_trainer import LinearRegressionModelTrainer
+
+import torch
+import torch.nn as nn
+
+import common_features.linear as linear
 
 
 class MyTestCase(unittest.TestCase):
     def setUp(self):
         self.bias = 0.5
         self.weight = 3.0
-        self.model = LinearRegressionModelToSave()
+        self.model = linear.LinearRegressionModelUsingCustomParameters()
 
     def test_saving_model_state_for_trained_model(self):
-        train_set_x, train_set_y = self.create_training_set()
+        train_set_x, train_set_y, _, _ = linear.create_linear_data_set(0., 1., 0.02, self.weight, self.bias)
         self.train_model(train_set_x, train_set_y)
         print(f'The trained model state: {self.model.state_dict()}')
 
@@ -33,18 +35,26 @@ class MyTestCase(unittest.TestCase):
         torch.save(self.model.state_dict(), model_save_path)
 
         # Let's load the model back to model
-        another_model = LinearRegressionModelToSave()
+        another_model = linear.LinearRegressionModelUsingCustomParameters()
         another_model.load_state_dict(torch.load(model_save_path))
         print(f'Model state loaded: {another_model.state_dict()}')
 
-    def create_training_set(self):
-        train_set_x = torch.arange(0., 1., 0.02).unsqueeze(dim=1)
-        train_set_y = self.weight * train_set_x + self.bias
-        return train_set_x, train_set_y
-
     def train_model(self, train_set_x, train_set_y):
-        trainer = LinearRegressionModelTrainer(self.model)
-        trainer.train(10000, 0.00000001, train_set_x, train_set_y)
+        self.train(10000, 1e-7, train_set_x, train_set_y)
+
+    def train(self, max_epochs: int, min_error: float, train_set_x: torch.Tensor, train_set_y: torch.Tensor):
+        loss_function = nn.MSELoss()
+        optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01)
+
+        for epoch in range(max_epochs):
+            self.model.train()
+            pred_y = self.model(train_set_x)
+            loss = loss_function(pred_y, train_set_y)
+            if loss < min_error:
+                break
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
 
 if __name__ == '__main__':

@@ -2,8 +2,9 @@ import math
 import unittest
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
-from device_independent_linear_model import DeviceIndependentLinearModel
+
+import common_features.linear as linear
+import common_features.plot as plt
 
 
 class DeviceIndependentRegression(unittest.TestCase):
@@ -15,40 +16,14 @@ class DeviceIndependentRegression(unittest.TestCase):
     def test_device_independent_regression(self):
         print(f'Device independent regression test running with pyTorch: {torch.__version__}')
         print(f'Running on device: {self.device}')
-        x_train_set, y_train_set, x_test_set, y_test_set = self.create_data_set(1.5, 3)
-        self.plot_data_set(x_train_set, y_train_set, x_test_set, y_test_set)
-        model = DeviceIndependentLinearModel(self.device)
+        x_train_set, y_train_set, x_test_set, y_test_set = linear.create_linear_data_set(0., 50., 0.01, 1.5, 3)
+        plt.plot_linear_training_set_and_expected_test_set(x_train_set, y_train_set, x_test_set, y_test_set)
+        model = linear.DeviceIndependentLinearModel(self.device)
         print(f'Before training, we initialized the model using random values: {model.state_dict()}')
         errors = self.train_model(model, x_train_set, y_train_set, max_epochs=10000)
-        self.plot_error(errors)
+        plt.plot_loss_values(torch.Tensor(errors))
         print(f'After training, the model parameters are: {model.state_dict()}')
         self.evaluate_model(model, x_train_set, y_train_set, x_test_set, y_test_set)
-
-    # noinspection DuplicatedCode
-    @staticmethod
-    def create_data_set(expected_weight, expected_bias):
-        # by default the data set is created on the cpu, we will move it to the gpu when needed
-        full_data_set_x = torch.arange(0., 50., step=0.01).unsqueeze(dim=1)
-        full_data_set_y = expected_weight * full_data_set_x + expected_bias
-        train_set_size = int(len(full_data_set_x) * 0.8)
-        x_train_set = full_data_set_x[:train_set_size]
-        y_train_set = full_data_set_y[:train_set_size]
-        x_test_set = full_data_set_x[train_set_size:]
-        y_test_set = full_data_set_y[train_set_size:]
-        return x_train_set, y_train_set, x_test_set, y_test_set
-
-    @staticmethod
-    def plot_data_set(x_train_set: torch.Tensor, y_train_set: torch.Tensor, x_test_set: torch.Tensor,
-                      y_test_set: torch.Tensor, predictions: torch.Tensor = None):
-        plt.figure(figsize=(10, 7))
-        plt.title('Linear Regression (Train/Test Sets)')
-        plt.scatter(x_train_set, y_train_set, c='blue', label='Train Set', s=2)
-        plt.scatter(x_test_set, y_test_set, c='green', label='Test Set', s=2)
-        if predictions is not None:
-            plt.scatter(x_test_set, predictions, c='red', label='Predictions', s=2)
-
-        plt.legend(prop={'size': 14})
-        plt.show()
 
     def train_model(self, model, x_train_set, y_train_set, max_epochs, error_threshold=1e-4):
         loss_function = nn.MSELoss()
@@ -81,21 +56,14 @@ class DeviceIndependentRegression(unittest.TestCase):
 
         return error
 
-    @staticmethod
-    def plot_error(error):
-        plt.figure(figsize=(10, 7))
-        plt.title('Training Error')
-        plt.plot(torch.arange(0, len(error)), torch.tensor(error), c='blue', label='Error')
-        plt.legend(prop={'size': 14})
-        plt.show()
-
     def evaluate_model(self, model, x_train_set, y_train_set, x_test_set, y_test_set):
         x_test_set_on_device = x_test_set.to(self.device)
         y_test_set_on_device = y_test_set.to(self.device)
         model.eval()
         with torch.inference_mode():
             y_pred_on_device = model(x_test_set_on_device)
-            self.plot_data_set(x_train_set, y_train_set, x_test_set, y_test_set, predictions=y_pred_on_device.cpu())
+            plt.plot_linear_training_set_and_expected_test_set(
+                x_train_set, y_train_set, x_test_set, y_test_set, predictions=y_pred_on_device.cpu())
             loss = nn.MSELoss()(y_pred_on_device, y_test_set_on_device)
             print(f'Test loss: {loss}')
 
