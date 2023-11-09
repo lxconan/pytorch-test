@@ -3,6 +3,7 @@ import math
 
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader, TensorDataset
 
 import common_features.linear as linear
 import common_features.plot as plt
@@ -40,13 +41,13 @@ class LargeBatchAndSmallBatchTest(unittest.TestCase):
               error_threshold: float):
         errors = []
         loss_function = nn.MSELoss()
+        train_data_set = TensorDataset(train_set_x, train_set_y)
+        loader = DataLoader(train_data_set, shuffle=True, batch_size=batch_size)
         for epoch in range(max_epochs):
-            model.train()
-            for batch_train_set in zip(train_set_x.tensor_split(batch_size), train_set_y.tensor_split(batch_size)):
-                batch_train_set_x = batch_train_set[0]
-                batch_train_set_y = batch_train_set[1]
-                batch_pred_set_y = model(batch_train_set_x)
-                batch_loss = loss_function(batch_pred_set_y, batch_train_set_y)
+            for batch_x, batch_y in loader:
+                model.train()
+                batch_pred_set_y = model(batch_x)
+                batch_loss = loss_function(batch_pred_set_y, batch_y)
                 errors.append(batch_loss)
                 if batch_loss < error_threshold:
                     print(f'Training stopped at epoch "{epoch}" with error "{batch_loss}"')

@@ -130,6 +130,5 @@ class TestBinaryClassification(unittest.TestCase):
         cplt.plot_loss_values(torch.tensor(errors))
 
 
-
 if __name__ == '__main__':
     unittest.main()
