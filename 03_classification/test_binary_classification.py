@@ -13,15 +13,26 @@ class CircleClassifier(nn.Module):
     def __init__(self):
         super(CircleClassifier, self).__init__()
         self.layer_input = nn.Linear(2, 10)
-        self.layer_hidden = nn.Linear(10, 10)
+        torch.nn.init.xavier_uniform_(self.layer_input.weight)
+        self.layer_hidden_1 = nn.Linear(10, 10)
+        torch.nn.init.xavier_uniform_(self.layer_hidden_1.weight)
+        self.layer_hidden_2 = nn.Linear(10, 10)
+        torch.nn.init.xavier_uniform_(self.layer_hidden_2.weight)
+        self.layer_hidden_3 = nn.Linear(10, 10)
+        torch.nn.init.xavier_uniform_(self.layer_hidden_3.weight)
         self.layer_output = nn.Linear(10, 1)
-        self.activation = nn.LeakyReLU()
+        torch.nn.init.xavier_uniform_(self.layer_output.weight)
+        self.activation = nn.Tanh()
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x = self.layer_input(x)
         x = self.activation(x)
-        x = self.layer_hidden(x)
+        x = self.layer_hidden_1(x)
+        x = self.activation(x)
+        x = self.layer_hidden_2(x)
+        x = self.activation(x)
+        x = self.layer_hidden_3(x)
         x = self.activation(x)
         x = self.layer_output(x)
         return self.sigmoid(x)
@@ -74,7 +85,7 @@ class TestBinaryClassification(unittest.TestCase):
         circle_id_train = circle_id_train.to(device)
         circle_id_test = circle_id_test.to(device)
 
-        self.train(model, positions_train, circle_id_train, epochs=10000, accuracy_threshold=99.9)
+        self.train(model, positions_train, circle_id_train, epochs=10000, accuracy_threshold=99)
 
         # Test
         with torch.inference_mode():
