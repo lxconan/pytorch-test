@@ -118,10 +118,10 @@ class TestBinaryClassification(unittest.TestCase):
             # output. The reason is that the loss function expects the output to be between 0 and 1. If we round the
             # output, it will be either 0 or 1. So the loss function will not be able to get a continuous gradient.
             circle_id_pred_logits = model(positions_train)
-            circle_id_pred = torch.round(circle_id_pred_logits)  # Convert the output to 0 or 1.
-
             # Calculate loss and accuracy
             loss = loss_function(circle_id_pred_logits, circle_id_train)
+
+            circle_id_pred = torch.round(circle_id_pred_logits)  # Convert the output to 0 or 1.
             accuracy = accuracy_fn(circle_id_train, circle_id_pred)
             errors.append(100 - accuracy)
             if accuracy > accuracy_threshold:
