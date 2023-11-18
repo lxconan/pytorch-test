@@ -45,7 +45,7 @@ def plot_decision_boundary(model: torch.nn.Module, x: torch.Tensor, y: torch.Ten
     # Setup prediction boundaries and grid
     x_min, x_max = x[:, 0].min() - 0.1, x[:, 0].max() + 0.1
     y_min, y_max = x[:, 1].min() - 0.1, x[:, 1].max() + 0.1
-    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 101), np.linspace(y_min, y_max, 101))
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 1001), np.linspace(y_min, y_max, 1001))
 
     # Make features
     x_to_pred_on = torch.from_numpy(np.column_stack((xx.ravel(), yy.ravel()))).float()
@@ -64,7 +64,7 @@ def plot_decision_boundary(model: torch.nn.Module, x: torch.Tensor, y: torch.Ten
     # Reshape predicts and plot
     y_pred = y_pred.reshape(xx.shape).detach().numpy()
     plt.contourf(xx, yy, y_pred, cmap=plt.cm.RdYlBu, alpha=0.7)
-    plt.scatter(x[:, 0], x[:, 1], c=y, s=40, cmap=plt.cm.RdYlBu)
+    plt.scatter(x[:, 0], x[:, 1], c=y, s=2, cmap=plt.cm.RdYlBu)
     plt.xlim(xx.min(), xx.max())
     plt.ylim(yy.min(), yy.max())
     plt.show()
