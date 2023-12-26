@@ -22,10 +22,10 @@ def plot_linear_training_set_and_expected_test_set(train_x: torch.Tensor, train_
     plt.show()
 
 
-def plot_loss_values(loss_values: torch.Tensor):
+def plot_loss_values(loss_values: torch.Tensor, label: str = 'Training loss', title: str = 'Training Error'):
     plt.figure(figsize=(10, 7))
-    plt.title('Training Error')
-    plt.plot(torch.arange(0, len(loss_values), step=1), loss_values, label='Training loss')
+    plt.title(title)
+    plt.plot(torch.arange(0, len(loss_values), step=1), loss_values, label=label)
     plt.legend(prop={'size': 14})
     plt.ylim(bottom=0)
     plt.xlabel('Epoch')
